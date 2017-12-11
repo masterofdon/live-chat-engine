@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>IO Chat</title>
+	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	
+</head>
+<body>
+<div class="container" style="margin-top: 80px;">
+	<div class="row">
+		<div class="col-md-4">
+			<div class="well">
+				<h3>Online Users</h3>
+				<ul class="list-group" id="users"></ul>
+			</div>
+		</div>
+		<div class="col-md-8">
+			<div class="chat" id="chat"></div>
+			<form id="messageForm">
+				<div class="form-group">
+					<label>Enter Message</label>
+					<textarea class="form-control" id="message" ></textarea>
+					<br/>
+					<input type="submit" class="btn btn-primary" value="Send Message" />
+				</div>
+			</form>
+			<div class="radio">
+			  <label class="btn btn-default" id="garsonbirbutton">Garson Bir</label>
+			</div>
+			<div class="radio">
+			  <label class="btn btn-default" id="garsonikibutton">Garson Iki</label>
+			</div>
+			<div class="login">
+			  <label class="btn btn-default"><button" name="loginas" />Login As</label>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js">
+</script>
+<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="web/js/chatadapter.js"></script>
+<script type="text/javascript">
+var connected = false;
+var messageQueue = [];
+var chatadapter = {};
+var $userid = "KOK5VJL2R0C9FIP9G6";
+var $chatkey = "fadsafasdasd";
+var userObj = {
+	userid : $userid,
+	chatkey : $chatkey
+};
+chatadapter.user = userObj;
+(function connect(){
+	var socket;
+	var $messageForm = $("#messageForm");
+	var $message = $("#message");
+	var $chat = $('#chat');
+	var sendData = { userid : 'KOK5VJL2R0C9FIP9G6' , chatkey : "fadsafasdasd"};
+	var sendData2 = { userid : 'BUAGZ3WVX3JWAJMIW3' , chatkey : "fdas3333"};
+	$("#garsonbirbutton").on("click", function(event){
+		if(!connected){
+			socket = io.connect();			
+			socket.on('servertoclient' , function(data){
+				console.log(data);
+			});
+			socket.on('user-login-res' , function(data){
+				console.log(data);
+				if(messageQueue.length != 0){
+					for(var i =0;i < messageQueue.length;i++){
+						socket.emit('fromclienttoserver', messageQueue[i]);
+					}
+				}
+			});
+			connected = true;
+			socket.on('disconnect' , function(data){
+				connected = false;
+			});
+			socket.on('connect',function(data){
+				socket.emit('user-login', {user : sendData });
+			});
+		} else {
+			socket.disconnect();
+			connected = false;
+		}
+	});
+
+	$("#garsonikibutton").on("click", function(event){
+		if(!connected){
+			socket = io.connect();			
+			socket.on('servertoclient' , function(data){
+				console.log(data);
+			});
+			socket.on('user-login-res' , function(data){
+				console.log(data);
+				if(messageQueue.length != 0){
+					for(var i =0;i < messageQueue.length;i++){
+						socket.emit('fromclienttoserver', messageQueue[i]);
+					}
+				}
+			});
+			connected = true;
+			socket.on('disconnect' , function(data){
+				connected = false;
+			});
+			socket.on('connect',function(data){
+				socket.emit('user-login', {user : sendData2 });
+			});
+		} else {
+			socket.disconnect();
+			connected = false;
+		}
+	});
+
+	$messageForm.submit(function(e){
+		e.preventDefault();
+		var message = $message.val();
+		console.log("Sending message: " + message);
+		if(socket.connected){
+			socket.emit('fromclienttoserver', createMessage(userObj,message));
+		}else {
+			var messageObj = createMessage(userObj,message);
+			messageQueue.push(messageObj);
+		}
+		$message.val('');
+	});
+})();
+
+function createMessage(userobj,message){
+	var returner = {};
+	returner.user = userobj;
+	returner.msg = message;
+	returner.conversation = "adasfads";
+	returner.timestamp = Date.now();
+	return returner;
+}
+
+function retryConnection(){
+	setTimeout(function(){
+
+	},1000)
+};
+
+function loadConversationsForUser(){
+
+}
+
+function login(){
+	$garsonname = $("input[name='garsonname']:checked").val();
+	if(radioValue){
+        alert("Your are a - " + radioValue);
+	}
+}
+</script>
+</body>
+
+</html>
